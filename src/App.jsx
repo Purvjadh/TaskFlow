@@ -4,6 +4,7 @@ import {useState} from "react"
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import BoardsPage from "./pages/BoardsPage.jsx"
 import BoardsDetailPage from "./pages/BoardsDetailPage"
+import { TaskProvider } from "./context/TaskContext.jsx"
 
 export default function App() {
    const [tasks,setTasks]=useState([
@@ -54,7 +55,8 @@ export default function App() {
 }
 
   return(
-   <BrowserRouter>
+   <TaskProvider>
+      <BrowserRouter>
       <Routes>
         <Route path="/" element={<BoardsPage boards={boards} setBoards={setBoards} onAddBoard={handleAddBoard}/>} />
         <Route 
@@ -70,5 +72,6 @@ export default function App() {
         />} />
       </Routes>
    </BrowserRouter>
+   </TaskProvider>
   )
 }
