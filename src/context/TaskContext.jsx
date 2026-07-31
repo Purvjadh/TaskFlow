@@ -1,20 +1,36 @@
 import { createContext } from "react";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 const TaskContext=createContext(null)
 
 
 
 export function TaskProvider({ children }) {
-  const [tasks, setTasks] = useState([
-    { id: 1, title: "Learn React Hooks", status: "To Do", priority: "Medium", dueDate: "2026-08-05", boardId: 2 },
-    { id: 2, title: "Build Task Manager", status: "In Progress", priority: "High", dueDate: "2026-08-25", boardId: 1 },
-    { id: 3, title: "Setup Tailwind", status: "Done", priority: "Low", dueDate: "2026-07-20", boardId: 1 },
-  ])
+  const [tasks, setTasks] = useState(() => {
+    const saved = localStorage.getItem("taskflow-tasks")
+    return saved ? JSON.parse(saved) : [
+      { id: 1, title: "Learn React Hooks", status: "To Do", priority: "Medium", dueDate: "2026-08-05", boardId: 2 },
+      { id: 2, title: "Build Task Manager", status: "In Progress", priority: "High", dueDate: "2026-08-25", boardId: 1 },
+      { id: 3, title: "Setup Tailwind", status: "Done", priority: "Low", dueDate: "2026-07-20", boardId: 1 },
+    ]
+  })
 
-  const [boards, setBoards] = useState([
-    { id: 1, name: "Work Project" },
-    { id: 2, name: "Personal" },
-  ])
+
+
+  const [boards, setBoards] = useState(() => {
+    const saved = localStorage.getItem("taskflow-boards")
+    return saved ? JSON.parse(saved) : [
+      { id: 1, name: "Work Project" },
+      { id: 2, name: "Personal" },
+    ]
+  })
+
+  useEffect(() => {
+  localStorage.setItem("taskflow-tasks", JSON.stringify(tasks))
+}, [tasks])
+
+useEffect(() => {
+  localStorage.setItem("taskflow-boards", JSON.stringify(boards))
+}, [boards])
 
   function handleDelete(taskId) {
     setTasks(tasks.filter((task) => task.id !== taskId))
@@ -55,6 +71,14 @@ export function TaskProvider({ children }) {
   setBoards([...boards, newBoard])
 }
 
+function handleEditTitle(taskId, newTitle) {
+  setTasks(tasks.map((task) => task.id === taskId ? { ...task, title: newTitle } : task))
+}
+
+function handleDeleteBoard(boardId) {
+  setBoards(boards.filter((board) => board.id !== boardId))
+  setTasks(tasks.filter((task) => task.boardId !== boardId))
+}
 
   const value = {
     tasks,
@@ -63,7 +87,9 @@ export function TaskProvider({ children }) {
     handleAdd,
     handleStatusChange, 
     handlePriorityChange,
-    handleAddBoard
+    handleAddBoard,
+    handleEditTitle,
+    handleDeleteBoard
   }
 
   return (

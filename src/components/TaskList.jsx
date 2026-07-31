@@ -1,16 +1,13 @@
 import TaskCard from "./TaskCard.jsx"
 
-function TaskList({onDelete,onPriorityChange,onStatusChange,tasks}){
+function TaskList({tasks}){
     return(
-        <div>
+        <div className="space-y-3">
         {
         tasks.map((task) =>(
           <TaskCard
             task={task}
             key={task.id}
-            onStatusChange={onStatusChange}
-            onDelete={onDelete}
-            onPriorityChange={onPriorityChange}
           />
         ))
       }
