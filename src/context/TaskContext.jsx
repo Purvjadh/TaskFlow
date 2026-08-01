@@ -14,7 +14,7 @@ export function TaskProvider({ children }) {
     ]
   })
 
-
+const STATUSES = ["To Do", "In Progress", "Done"]
 
   const [boards, setBoards] = useState(() => {
     const saved = localStorage.getItem("taskflow-boards")
@@ -89,7 +89,8 @@ function handleDeleteBoard(boardId) {
     handlePriorityChange,
     handleAddBoard,
     handleEditTitle,
-    handleDeleteBoard
+    handleDeleteBoard,
+    STATUSES
   }
 
   return (
@@ -100,3 +101,4 @@ function handleDeleteBoard(boardId) {
 }
 
 export default TaskContext
+
