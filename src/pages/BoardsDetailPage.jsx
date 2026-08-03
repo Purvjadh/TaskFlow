@@ -1,29 +1,32 @@
-import {useState,useContext} from "react"
-import Column from "../components/Column.jsx"
-import { useParams } from "react-router-dom"
-import { Link } from "react-router-dom"
+import { useState, useContext } from "react"
+import TaskForm from "../components/TaskForm.jsx"
+import TaskList from "../components/TaskList.jsx"
+import { useParams, Link } from "react-router-dom"
 import TaskContext from "../context/TaskContext.jsx"
 
-const COLUMNS = ["To Do", "In Progress", "Done"]
+export default function BoardsDetailPage() {
+  const { boardId } = useParams()
+  const { tasks, boards, handleAdd } = useContext(TaskContext)
+  const currentBoard = boards.find((b) => b.id === Number(boardId))
+  const [searchText, setSearchText] = useState("")
 
-export default function BoardsDetailPage (){
-    const { boardId } = useParams()
-    const{tasks,boards}=useContext(TaskContext)
-    const currentBoard = boards.find((b) => b.id === Number(boardId))
-    const [searchText, setSearchText] = useState("")
-    const tasksForThisBoard = tasks.filter((task) => task.boardId === Number(boardId))
-    const filteredTasks = tasksForThisBoard.filter((task) =>
-        task.title.toLowerCase().includes(searchText.toLowerCase())
-    )
+  const tasksForThisBoard = tasks.filter((task) => task.boardId === Number(boardId))
+  const filteredTasks = tasksForThisBoard.filter((task) =>
+    task.title.toLowerCase().includes(searchText.toLowerCase())
+  )
+
+  function handleAddTask(title, dueDate) {
+    handleAdd(title, dueDate, Number(boardId))
+  }
 
   return (
-    <div className="min-h-screen bg-bg">
-      <div className="max-w-6xl mx-auto px-8 py-10">
-        <Link to="/" className="text-sm text-text-secondary hover:text-accent transition-colors">
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-3xl mx-auto px-8 py-10">
+        <Link to="/" className="text-sm text-slate-500 hover:text-indigo-600 transition-colors">
           &larr; Back to boards
         </Link>
 
-        <h1 className="text-2xl font-semibold tracking-tight text-text-primary mt-3 mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 mt-3 mb-6">
           {currentBoard?.name}
         </h1>
 
@@ -32,19 +35,24 @@ export default function BoardsDetailPage (){
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           placeholder="Search tasks..."
-          className="border border-border rounded-md px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent mb-6 w-full max-w-sm bg-surface"
+          className="border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent mb-6 w-full max-w-sm"
         />
 
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {COLUMNS.map((columnName) => (
-            <Column
-              key={columnName}
-              title={columnName}
-              tasks={filteredTasks.filter((task) => task.status === columnName)}
-              boardId={Number(boardId)}
-            />
-          ))}
-        </div>
+        <TaskForm onAddTask={handleAddTask} />
+
+        {filteredTasks.length === 0 ? (
+          <div className="text-center py-16 border border-dashed border-slate-200 rounded-lg">
+            <div className="text-3xl mb-2">📋</div>
+            <p className="text-sm font-medium text-slate-700">
+              {searchText ? "No matching tasks" : "No tasks yet"}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              {searchText ? "Try a different search term." : "Add your first task using the form above."}
+            </p>
+          </div>
+        ) : (
+          <TaskList tasks={filteredTasks} />
+        )}
       </div>
     </div>
   )

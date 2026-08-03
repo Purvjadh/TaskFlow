@@ -1,5 +1,8 @@
 import { useContext,useState } from "react"
 import TaskContext from "../context/TaskContext.jsx"
+import { FlagIcon } from "@heroicons/react/16/solid"
+import IconButton from "./IconButton.jsx"
+import Popover from "./Popover.jsx"
 
 function TaskCard({task}){
 
@@ -8,11 +11,20 @@ const [editedTitle, setEditedTitle] = useState(task.title)
 
 const{handleDelete,handlePriorityChange,handleStatusChange,handleEditTitle}=useContext(TaskContext)
 
-function getPriorityStyles(priority) {
-  if (priority === "High") return { badge: "bg-red-50 text-red-700", border: "border-l-red-400" }
-  if (priority === "Medium") return { badge: "bg-amber-50 text-amber-700", border: "border-l-amber-400" }
-  return { badge: "bg-emerald-50 text-emerald-700", border: "border-l-emerald-400" }
-  }
+const PRIORITY_OPTIONS = [
+  { label: "None", color: "text-slate-400" },
+  { label: "Urgent", color: "text-red-400" },
+  { label: "High", color: "text-amber-400" },
+  { label: "Normal", color: "text-blue-400" },
+  { label: "Low", color: "text-slate-400" },
+  
+]
+
+// function getPriorityStyles(priority) {
+//   if (priority === "High") return { badge: "bg-red-50 text-red-700" }
+//   if (priority === "Medium") return { badge: "bg-amber-50 text-amber-700"}
+//   return { badge: "bg-emerald-50 text-emerald-700" }
+//   }
 
   function isOverdue() {
     if (!task.dueDate) return false
@@ -26,10 +38,12 @@ function getPriorityStyles(priority) {
     setIsEditing(false)
   }
 
-  const priorityStyles = getPriorityStyles(task.priority)
+  const currentPriority = PRIORITY_OPTIONS.find((p) => p.label === task.priority) || PRIORITY_OPTIONS[0]
+
+  //const priorityStyles = getPriorityStyles(task.priority)
 
     return(
-         <div className={`bg-white border border-slate-200 border-l-4 ${priorityStyles.border} rounded-lg p-4 mb-3`}>
+         <div className={`bg-white border border-slate-200 border-l-4  rounded-lg p-4 mb-3`}>
 
         {isEditing ? (
           <input
@@ -52,9 +66,9 @@ function getPriorityStyles(priority) {
 
         
 
-        <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded mt-2 ${priorityStyles.badge}`}>
+        {/* <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded mt-2 ${priorityStyles.badge}`}>
              {task.priority}
-        </span>
+        </span> */}
 
          {task.dueDate && (
         <p className={`text-xs mt-2 ${isOverdue() ? "text-red-600 font-medium" : "text-slate-500"}`}>
@@ -73,15 +87,37 @@ function getPriorityStyles(priority) {
             <option value="Done">Done</option>
         </select>
 
-         <select
-         value={task.priority}
-         onChange={(e) => handlePriorityChange(task.id,e.target.value) }
-         className="text-xs border border-slate-200 rounded px-2 py-1 text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              
+        <Popover
+          trigger={
+            <button className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-slate-200 text-xs text-slate-700 hover:border-slate-300">
+              <FlagIcon className={`w-4 h-4 ${currentPriority.color}`} />
+              {task.priority && task.priority !== "None" && task.priority}
+            </button>
+          }
         >
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="High">High</option>
-        </select>
+          {(close) => (
+            <div className="w-40 py-1">
+              <p className="px-3 py-1.5 text-xs font-medium text-slate-400">Priority</p>
+              {PRIORITY_OPTIONS.map((option) => (
+                <button
+                  key={option.label}
+                  onClick={() => {
+                    handlePriorityChange(task.id, option.label)
+                    close()
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  <FlagIcon className={`w-4 h-4 ${option.color}`} />
+                  {option.label}
+                  {task.priority === option.label && (
+                    <span className="ml-auto text-indigo-600">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </Popover>
 
         <button onClick={() => handleDelete(task.id)} className="ml-auto text-xs text-slate-400 hover:text-red-600 transition-colors">
           Delete
