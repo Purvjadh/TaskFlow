@@ -3,16 +3,18 @@ import TaskContext from "../context/TaskContext.jsx"
 import { FlagIcon } from "@heroicons/react/16/solid"
 import IconButton from "./IconButton.jsx"
 import Popover from "./Popover.jsx"
+import { NoSymbolIcon } from "@heroicons/react/16/solid"
+import DatePickerField from "./DatePickerField.jsx"
 
 function TaskCard({task}){
 
 const [isEditing, setIsEditing] = useState(false)
 const [editedTitle, setEditedTitle] = useState(task.title)
 
-const{handleDelete,handlePriorityChange,handleStatusChange,handleEditTitle}=useContext(TaskContext)
+const{handleDelete,handlePriorityChange,handleStatusChange,handleEditTitle ,handleDueDateChange}=useContext(TaskContext)
 
 const PRIORITY_OPTIONS = [
-  { label: "None", color: "text-slate-400" },
+  
   { label: "Urgent", color: "text-red-400" },
   { label: "High", color: "text-amber-400" },
   { label: "Normal", color: "text-blue-400" },
@@ -38,7 +40,7 @@ const PRIORITY_OPTIONS = [
     setIsEditing(false)
   }
 
-  const currentPriority = PRIORITY_OPTIONS.find((p) => p.label === task.priority) || PRIORITY_OPTIONS[0]
+  const currentPriority = PRIORITY_OPTIONS.find((p) => p.label === task.priority) 
 
   //const priorityStyles = getPriorityStyles(task.priority)
 
@@ -70,14 +72,11 @@ const PRIORITY_OPTIONS = [
              {task.priority}
         </span> */}
 
-         {task.dueDate && (
-        <p className={`text-xs mt-2 ${isOverdue() ? "text-red-600 font-medium" : "text-slate-500"}`}>
-          Due {task.dueDate} {isOverdue() && "· Overdue"}
-        </p>
-      )}
+   
+        
 
         <div className="flex items-center gap-2 mt-3">
-        <select
+        {/* <select
             value={task.status}
             onChange={(e) => handleStatusChange(task.id,e.target.value) }
             className="text-xs border border-slate-200 rounded px-2 py-1 text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -85,14 +84,14 @@ const PRIORITY_OPTIONS = [
             <option value="To Do">To Do</option>
             <option value="In Progress">In Progress</option>
             <option value="Done">Done</option>
-        </select>
+        </select> */}
 
               
         <Popover
           trigger={
-            <button className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-slate-200 text-xs text-slate-700 hover:border-slate-300">
-              <FlagIcon className={`w-4 h-4 ${currentPriority.color}`} />
-              {task.priority && task.priority !== "None" && task.priority}
+            <button className="inline-flex items-center gap-1  px-1.5 py-1  rounded-md border border-slate-200 text-xs text-slate-700 hover:border-slate-300">
+              <FlagIcon className={`w-3.5 h-3.5 ${currentPriority ? currentPriority.color : "text-slate-300"}`} />
+              {currentPriority && task.priority}
             </button>
           }
         >
@@ -115,16 +114,38 @@ const PRIORITY_OPTIONS = [
                   )}
                 </button>
               ))}
+
+
+            <div className="border-t border-slate-100 mt-1 pt-1">
+              <button
+                onClick={() => {
+                  handlePriorityChange(task.id, "")
+                  close()
+                }}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-50"
+              >
+                <NoSymbolIcon className="w-4 h-4 text-slate-400" />
+                Clear
+              </button>
+            </div>
+
+            
             </div>
           )}
         </Popover>
+
+        <DatePickerField
+          selectedDate={task.dueDate}
+          onDateChange={(newDate) => handleDueDateChange(task.id, newDate)}
+
+        />
 
         <button onClick={() => handleDelete(task.id)} className="ml-auto text-xs text-slate-400 hover:text-red-600 transition-colors">
           Delete
         </button>
         </div>
 
-          </div>
+    </div>
     )
 
 }

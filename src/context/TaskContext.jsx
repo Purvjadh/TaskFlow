@@ -80,6 +80,10 @@ function handleDeleteBoard(boardId) {
   setTasks(tasks.filter((task) => task.boardId !== boardId))
 }
 
+function handleDueDateChange(taskId, newDate) {
+  setTasks(tasks.map((task) => task.id === taskId ? { ...task, dueDate: newDate } : task))
+}
+
   const value = {
     tasks,
     boards,
@@ -90,6 +94,7 @@ function handleDeleteBoard(boardId) {
     handleAddBoard,
     handleEditTitle,
     handleDeleteBoard,
+     handleDueDateChange, 
     STATUSES
   }
 
