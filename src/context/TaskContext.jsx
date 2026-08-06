@@ -1,16 +1,132 @@
+// import { createContext } from "react";
+// import { useState,useEffect } from "react";
+// const TaskContext=createContext(null)
+
+
+
+// export function TaskProvider({ children }) {
+//   const [tasks, setTasks] = useState(() => {
+//     const saved = localStorage.getItem("taskflow-tasks")
+//     return saved ? JSON.parse(saved) : [
+//       { id: 1, title: "Learn React Hooks", status: "To Do", priority: "Medium", dueDate: "2026-08-05",startDate: "", boardId: 2},
+//       { id: 2, title: "Build Task Manager", status: "In Progress", priority: "High", dueDate: "2026-08-25", startDate: "", boardId: 1 },
+//       { id: 3, title: "Setup Tailwind", status: "Done", priority: "Low", dueDate: "2026-07-20",startDate: "", boardId: 1 },
+//     ]
+//   })
+
+// const STATUSES = ["To Do", "In Progress", "Done"]
+
+//   const [boards, setBoards] = useState(() => {
+//     const saved = localStorage.getItem("taskflow-boards")
+//     return saved ? JSON.parse(saved) : [
+//       { id: 1, name: "Work Project" },
+//       { id: 2, name: "Personal" },
+//     ]
+//   })
+
+//   useEffect(() => {
+//   localStorage.setItem("taskflow-tasks", JSON.stringify(tasks))
+// }, [tasks])
+
+// useEffect(() => {
+//   localStorage.setItem("taskflow-boards", JSON.stringify(boards))
+// }, [boards])
+
+//   function handleDelete(taskId) {
+//     setTasks(tasks.filter((task) => task.id !== taskId))
+//   }
+ 
+  
+//   function handleAdd(title,newDueDate,boardId){
+//      const newTask = {
+//       id: Date.now(),
+//       title: title,
+//       status: "To Do",
+//       priority:"Medium",
+//       dueDate:newDueDate,
+//       startDate: "",   
+//       boardId:boardId
+//     }
+
+//     setTasks([...tasks,newTask])
+    
+
+//   }
+
+//   function handleStartDateChange(taskId, newDate) {
+//   setTasks(tasks.map((task) => task.id === taskId ? { ...task, startDate: newDate } : task))
+// }
+
+  
+//   function handleStatusChange(taskId,newStatus){
+//     setTasks(tasks.map((task) => task.id === taskId ? {...task,status:newStatus}: task ))
+//   }
+
+
+//   function handlePriorityChange(taskId,newPriority){
+//     setTasks(
+//       tasks.map((task) => (
+//         task.id === taskId ? {...task,priority:newPriority}:task 
+//       ))
+//     )
+//   }
+
+//   function handleAddBoard(boardName) {
+//   const newBoard = { id: Date.now(), name: boardName }
+//   setBoards([...boards, newBoard])
+// }
+
+// function handleEditTitle(taskId, newTitle) {
+//   setTasks(tasks.map((task) => task.id === taskId ? { ...task, title: newTitle } : task))
+// }
+
+// function handleDeleteBoard(boardId) {
+//   setBoards(boards.filter((board) => board.id !== boardId))
+//   setTasks(tasks.filter((task) => task.boardId !== boardId))
+// }
+
+// function handleDueDateChange(taskId, newDate) {
+//   setTasks(tasks.map((task) => task.id === taskId ? { ...task, dueDate: newDate } : task))
+// }
+
+
+
+//   const value = {
+//     tasks,
+//     boards,
+//     handleDelete,
+//     handleAdd,
+//     handleStatusChange, 
+//     handlePriorityChange,
+//     handleAddBoard,
+//     handleEditTitle,
+//     handleDeleteBoard,
+//      handleDueDateChange, 
+//       handleStartDateChange,  
+//     STATUSES
+//   }
+
+//   return (
+//     <TaskContext.Provider value={value}>
+//       {children}
+//     </TaskContext.Provider>
+//   )
+// }
+
+// export default TaskContext
+
+
 import { createContext } from "react";
 import { useState,useEffect } from "react";
 const TaskContext=createContext(null)
-
-
 
 export function TaskProvider({ children }) {
   const [tasks, setTasks] = useState(() => {
     const saved = localStorage.getItem("taskflow-tasks")
     return saved ? JSON.parse(saved) : [
-      { id: 1, title: "Learn React Hooks", status: "To Do", priority: "Medium", dueDate: "2026-08-05", boardId: 2 },
-      { id: 2, title: "Build Task Manager", status: "In Progress", priority: "High", dueDate: "2026-08-25", boardId: 1 },
-      { id: 3, title: "Setup Tailwind", status: "Done", priority: "Low", dueDate: "2026-07-20", boardId: 1 },
+      { id: 1, title: "Learn React Hooks", status: "To Do", priority: "Medium", startDate: null, dueDate: "2026-08-05", boardId: 2 },
+      { id: 2, title: "Build Task Manager", status: "In Progress", priority: "High", startDate: null, dueDate: "2026-08-25", boardId: 1 },
+      { id: 3, title: "Setup Tailwind", status: "Done", priority: "Low", startDate: null, dueDate: "2026-07-20", boardId: 1 },
     ]
   })
 
@@ -33,7 +149,7 @@ useEffect(() => {
 }, [boards])
 
   function handleDelete(taskId) {
-    setTasks(tasks.filter((task) => task.id !== taskId))
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId))
   }
  
   
@@ -43,24 +159,25 @@ useEffect(() => {
       title: title,
       status: "To Do",
       priority:"Medium",
+      startDate: null,
       dueDate:newDueDate,
       boardId:boardId
     }
 
-    setTasks([...tasks,newTask])
+    setTasks((prevTasks) => [...prevTasks,newTask])
     
 
   }
 
   
   function handleStatusChange(taskId,newStatus){
-    setTasks(tasks.map((task) => task.id === taskId ? {...task,status:newStatus}: task ))
+    setTasks((prevTasks) => prevTasks.map((task) => task.id === taskId ? {...task,status:newStatus}: task ))
   }
 
 
   function handlePriorityChange(taskId,newPriority){
     setTasks(
-      tasks.map((task) => (
+      (prevTasks) => prevTasks.map((task) => (
         task.id === taskId ? {...task,priority:newPriority}:task 
       ))
     )
@@ -72,16 +189,20 @@ useEffect(() => {
 }
 
 function handleEditTitle(taskId, newTitle) {
-  setTasks(tasks.map((task) => task.id === taskId ? { ...task, title: newTitle } : task))
+  setTasks((prevTasks) => prevTasks.map((task) => task.id === taskId ? { ...task, title: newTitle } : task))
 }
 
 function handleDeleteBoard(boardId) {
   setBoards(boards.filter((board) => board.id !== boardId))
-  setTasks(tasks.filter((task) => task.boardId !== boardId))
+  setTasks((prevTasks) => prevTasks.filter((task) => task.boardId !== boardId))
 }
 
 function handleDueDateChange(taskId, newDate) {
-  setTasks(tasks.map((task) => task.id === taskId ? { ...task, dueDate: newDate } : task))
+  setTasks((prevTasks) => prevTasks.map((task) => task.id === taskId ? { ...task, dueDate: newDate } : task))
+}
+
+function handleStartDateChange(taskId, newDate) {
+  setTasks((prevTasks) => prevTasks.map((task) => task.id === taskId ? { ...task, startDate: newDate } : task))
 }
 
   const value = {
@@ -95,6 +216,7 @@ function handleDueDateChange(taskId, newDate) {
     handleEditTitle,
     handleDeleteBoard,
      handleDueDateChange, 
+     handleStartDateChange,
     STATUSES
   }
 
@@ -106,4 +228,3 @@ function handleDueDateChange(taskId, newDate) {
 }
 
 export default TaskContext
-

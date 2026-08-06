@@ -1,32 +1,39 @@
-import { useContext,useState } from "react"
+
+import { useContext, useState } from "react"
 import TaskContext from "../context/TaskContext.jsx"
-import { FlagIcon } from "@heroicons/react/16/solid"
-import IconButton from "./IconButton.jsx"
+import { FlagIcon, TrashIcon } from "@heroicons/react/16/solid"
+import { CheckCircleIcon, ClockIcon, PlayCircleIcon } from "@heroicons/react/16/solid"
 import Popover from "./Popover.jsx"
 import { NoSymbolIcon } from "@heroicons/react/16/solid"
 import DatePickerField from "./DatePickerField.jsx"
 
-function TaskCard({task}){
-
-const [isEditing, setIsEditing] = useState(false)
-const [editedTitle, setEditedTitle] = useState(task.title)
-
-const{handleDelete,handlePriorityChange,handleStatusChange,handleEditTitle ,handleDueDateChange}=useContext(TaskContext)
+const STATUS_OPTIONS = [
+  { label: "To Do", icon: ClockIcon, color: "text-slate-400" },
+  { label: "In Progress", icon: PlayCircleIcon, color: "text-amber-500" },
+  { label: "Done", icon: CheckCircleIcon, color: "text-emerald-500" },
+]
 
 const PRIORITY_OPTIONS = [
-  
   { label: "Urgent", color: "text-red-400" },
   { label: "High", color: "text-amber-400" },
   { label: "Normal", color: "text-blue-400" },
   { label: "Low", color: "text-slate-400" },
-  
 ]
 
-// function getPriorityStyles(priority) {
-//   if (priority === "High") return { badge: "bg-red-50 text-red-700" }
-//   if (priority === "Medium") return { badge: "bg-amber-50 text-amber-700"}
-//   return { badge: "bg-emerald-50 text-emerald-700" }
-//   }
+const PILL = "inline-flex items-center gap-1 px-1.5 py-1 rounded-md border border-slate-200 text-xs text-slate-700 hover:border-slate-300 whitespace-nowrap"
+
+function TaskCard({ task }) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedTitle, setEditedTitle] = useState(task.title)
+
+  const {
+    handleDelete,
+    handlePriorityChange,
+    handleStatusChange,
+    handleEditTitle,
+    handleDueDateChange,
+    handleStartDateChange
+  } = useContext(TaskContext)
 
   function isOverdue() {
     if (!task.dueDate) return false
@@ -40,56 +47,80 @@ const PRIORITY_OPTIONS = [
     setIsEditing(false)
   }
 
-  const currentPriority = PRIORITY_OPTIONS.find((p) => p.label === task.priority) 
+  const currentPriority = PRIORITY_OPTIONS.find((p) => p.label === task.priority)
+  const currentStatus = STATUS_OPTIONS.find((s) => s.label === task.status) || STATUS_OPTIONS[0]
+  const StatusIcon = currentStatus.icon
 
-  //const priorityStyles = getPriorityStyles(task.priority)
+  return (
+    <div className="group relative bg-white border border-slate-200 rounded-lg p-4 mb-3 hover:shadow-sm transition-shadow">
 
-    return(
-         <div className={`bg-white border border-slate-200 border-l-4  rounded-lg p-4 mb-3`}>
+      <button
+        onClick={() => handleDelete(task.id)}
+        title="Delete task"
+        className="absolute top-3 right-3 p-1 rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+      >
+        <TrashIcon className="w-4 h-4" />
+      </button>
 
-        {isEditing ? (
-          <input
-            type="text"
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            onBlur={handleSaveEdit}
-            onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
-            autoFocus
-            className="text-sm font-medium text-slate-900 border border-indigo-300 rounded px-2 py-1 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
-          />
-        ) : (
-          <h3
-            onClick={() => setIsEditing(true)}
-            className="text-sm font-medium text-slate-900 cursor-pointer hover:text-indigo-600"
-          >
-            {task.title}
-          </h3>
-        )}
+      {isEditing ? (
+        <input
+          type="text"
+          value={editedTitle}
+          onChange={(e) => setEditedTitle(e.target.value)}
+          onBlur={handleSaveEdit}
+          onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
+          autoFocus
+          className="text-sm font-medium text-slate-900 border border-indigo-300 rounded px-2 py-1 w-full pr-6 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      ) : (
+        <h3
+          onClick={() => setIsEditing(true)}
+          className="text-sm font-medium text-slate-900 cursor-pointer hover:text-indigo-600 pr-6"
+        >
+          {task.title}
+        </h3>
+      )}
 
-        
+      <div className="flex items-center gap-2 mt-3 flex-wrap">
 
-        {/* <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded mt-2 ${priorityStyles.badge}`}>
-             {task.priority}
-        </span> */}
-
-   
-        
-
-        <div className="flex items-center gap-2 mt-3">
-        {/* <select
-            value={task.status}
-            onChange={(e) => handleStatusChange(task.id,e.target.value) }
-            className="text-xs border border-slate-200 rounded px-2 py-1 text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
-            <option value="To Do">To Do</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Done">Done</option>
-        </select> */}
-
-              
         <Popover
           trigger={
-            <button className="inline-flex items-center gap-1  px-1.5 py-1  rounded-md border border-slate-200 text-xs text-slate-700 hover:border-slate-300">
+            <button className={PILL}>
+              <StatusIcon className={`w-3.5 h-3.5 ${currentStatus.color}`} />
+            </button>
+          }
+        >
+          {(close) => (
+            <div className="w-40 py-1">
+              <p className="px-3 py-1.5 text-xs font-medium text-slate-400">Status</p>
+              {STATUS_OPTIONS.map((option) => {
+                const OptIcon = option.icon
+                return (
+                  <button
+                    key={option.label}
+                    onClick={() => { handleStatusChange(task.id, option.label); close() }}
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+                  >
+                    <OptIcon className={`w-4 h-4 ${option.color}`} />
+                    {option.label}
+                    {task.status === option.label && <span className="ml-auto text-indigo-600">✓</span>}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </Popover>
+
+        <DatePickerField
+          selectedDate={task.dueDate}
+          onDateChange={(newDate) => handleDueDateChange(task.id, newDate)}
+          startDate={task.startDate}
+          onStartDateChange={(newDate) => handleStartDateChange(task.id, newDate)}
+        />
+
+        <Popover
+          trigger={
+            <button className={PILL}>
               <FlagIcon className={`w-3.5 h-3.5 ${currentPriority ? currentPriority.color : "text-slate-300"}`} />
               {currentPriority && task.priority}
             </button>
@@ -101,53 +132,29 @@ const PRIORITY_OPTIONS = [
               {PRIORITY_OPTIONS.map((option) => (
                 <button
                   key={option.label}
-                  onClick={() => {
-                    handlePriorityChange(task.id, option.label)
-                    close()
-                  }}
+                  onClick={() => { handlePriorityChange(task.id, option.label); close() }}
                   className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
                 >
                   <FlagIcon className={`w-4 h-4 ${option.color}`} />
                   {option.label}
-                  {task.priority === option.label && (
-                    <span className="ml-auto text-indigo-600">✓</span>
-                  )}
+                  {task.priority === option.label && <span className="ml-auto text-indigo-600">✓</span>}
                 </button>
               ))}
-
-
-            <div className="border-t border-slate-100 mt-1 pt-1">
-              <button
-                onClick={() => {
-                  handlePriorityChange(task.id, "")
-                  close()
-                }}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-50"
-              >
-                <NoSymbolIcon className="w-4 h-4 text-slate-400" />
-                Clear
-              </button>
-            </div>
-
-            
+              <div className="border-t border-slate-100 mt-1 pt-1">
+                <button
+                  onClick={() => { handlePriorityChange(task.id, ""); close() }}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-50"
+                >
+                  <NoSymbolIcon className="w-4 h-4 text-slate-400" />
+                  Clear
+                </button>
+              </div>
             </div>
           )}
         </Popover>
-
-        <DatePickerField
-          selectedDate={task.dueDate}
-          onDateChange={(newDate) => handleDueDateChange(task.id, newDate)}
-
-        />
-
-        <button onClick={() => handleDelete(task.id)} className="ml-auto text-xs text-slate-400 hover:text-red-600 transition-colors">
-          Delete
-        </button>
-        </div>
-
+      </div>
     </div>
-    )
-
+  )
 }
 
 export default TaskCard
