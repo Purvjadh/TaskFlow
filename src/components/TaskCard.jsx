@@ -1,7 +1,7 @@
 
 import { useContext, useState } from "react"
 import TaskContext from "../context/TaskContext.jsx"
-import { FlagIcon, TrashIcon } from "@heroicons/react/16/solid"
+import { FlagIcon, TrashIcon,PencilIcon } from "@heroicons/react/16/solid"
 import { CheckCircleIcon, ClockIcon, PlayCircleIcon } from "@heroicons/react/16/solid"
 import Popover from "./Popover.jsx"
 import { NoSymbolIcon } from "@heroicons/react/16/solid"
@@ -54,32 +54,43 @@ function TaskCard({ task }) {
   return (
     <div className="group relative bg-white border border-slate-200 rounded-lg p-4 mb-3 hover:shadow-sm transition-shadow">
 
-      <button
-        onClick={() => handleDelete(task.id)}
-        title="Delete task"
-        className="absolute top-3 right-3 p-1 rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
-      >
-        <TrashIcon className="w-4 h-4" />
-      </button>
 
-      {isEditing ? (
-        <input
-          type="text"
-          value={editedTitle}
-          onChange={(e) => setEditedTitle(e.target.value)}
-          onBlur={handleSaveEdit}
-          onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
-          autoFocus
-          className="text-sm font-medium text-slate-900 border border-indigo-300 rounded px-2 py-1 w-full pr-6 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-        />
-      ) : (
-        <h3
-          onClick={() => setIsEditing(true)}
-          className="text-sm font-medium text-slate-900 cursor-pointer hover:text-indigo-600 pr-6"
-        >
-          {task.title}
-        </h3>
-      )}
+      <div className="flex items-start justify-between gap-2">
+  
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                onBlur={handleSaveEdit}
+                onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
+                autoFocus
+                className="text-sm font-medium text-slate-900 border border-indigo-300 rounded px-2 py-1 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            ) : (
+              <h3 className="text-sm font-medium text-slate-900 flex-1">
+                {task.title}
+              </h3>
+            )}
+
+            {!isEditing && (
+              <div className="hidden group-hover:flex items-center gap-1 bg-white border border-slate-200 rounded-md px-1.5 py-1 shadow-sm shrink-0">
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="text-slate-400 hover:text-indigo-600 p-0.5"
+                >
+                  <PencilIcon className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => handleDelete(task.id)}
+                  className="text-slate-400 hover:text-red-500 p-0.5"
+                >
+                  <TrashIcon className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+
+      </div>
 
       <div className="flex items-center gap-2 mt-3 flex-wrap">
 

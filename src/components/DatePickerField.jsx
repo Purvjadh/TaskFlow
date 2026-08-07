@@ -2,6 +2,7 @@ import { useState } from "react"
 import { DayPicker } from "react-day-picker"
 import { CalendarIcon, NoSymbolIcon, XMarkIcon } from "@heroicons/react/16/solid"
 import Popover from "./Popover.jsx"
+import { addDays, addWeeks, nextSaturday, nextSunday } from "date-fns"
 
 function toISODate(date) {
   const year = date.getFullYear()
@@ -36,6 +37,18 @@ function DatePickerField({ selectedDate, onDateChange, startDate, onStartDateCha
   const dateObj = selectedDate ? new Date(selectedDate) : undefined
   const startDateObj = startDate ? new Date(startDate) : undefined
 
+  const today = new Date()
+
+const PRESETS = [
+  { label: "Today", date: today },
+  { label: "Tomorrow", date: addDays(today, 1) },
+  { label: "This weekend", date: nextSaturday(today) },
+  { label: "Next week", date: addWeeks(today, 1) },
+  { label: "Next weekend", date: nextSaturday(addWeeks(today, 1)) },
+  { label: "2 weeks", date: addWeeks(today, 2) },
+  { label: "4 weeks", date: addWeeks(today, 4) },
+]
+
   function handleSelect(date, close) {
     if (!date) return
     const formatted = toISODate(date)
@@ -63,7 +76,7 @@ function DatePickerField({ selectedDate, onDateChange, startDate, onStartDateCha
       onStartDateChange(toISODate(prevDay))
     }
 
-       close()
+       //close()
     }
   }
 
@@ -95,75 +108,101 @@ function DatePickerField({ selectedDate, onDateChange, startDate, onStartDateCha
         </button>
       }
     >
-      {(close) => (
-        <div className="w-80">
+     {(close) => (
+  <div className="w-auto">
 
-          <div className="flex gap-2 p-3 border-b border-slate-100">
+    {/* Top two fields */}
+    <div className="flex gap-2 p-3 border-b border-slate-100">
+      {/* Start date field — same as before */}
+      <div
+        onClick={() => setActiveField("start")}
+        className={`flex-1 flex items-center justify-between px-2 py-1.5 rounded-md border text-xs cursor-pointer transition-colors duration-300
+          ${activeField === "start" ? "border-indigo-300 bg-indigo-50" : "border-slate-200"}`}
+      >
+        <span className={startDateObj ? "text-indigo-700 font-medium" : "text-slate-400"}>
+          {startDateObj ? formatDisplay(startDateObj) : "Start date"}
+        </span>
+        {startDateObj && (
+          <XMarkIcon
+            className="w-3.5 h-3.5 text-slate-400 hover:text-red-500"
+            onClick={(e) => { e.stopPropagation(); onStartDateChange(null) }}
+          />
+        )}
+      </div>
 
-            <div
-              onClick={() => setActiveField("start")}
-              className={`flex-1 flex items-center justify-between px-2 py-1.5 rounded-md border text-xs cursor-pointer
-                ${activeField === "start" ? "border-indigo-300 bg-indigo-50" : "border-slate-200"}`}
-            >
-              <span className={startDateObj ? "text-indigo-700 font-medium" : "text-slate-400"}>
-                {startDateObj ? formatDisplay(startDateObj) : "Start date"}
-              </span>
-              {startDateObj && (
-                <XMarkIcon
-                  className="w-3.5 h-3.5 text-slate-400 hover:text-red-500"
-                  onClick={(e) => { e.stopPropagation(); onStartDateChange(null) }}
-                />
-              )}
-            </div>
+      {/* Due date field — same as before */}
+      <div
+        onClick={() => setActiveField("due")}
+        className={`flex-1 flex items-center justify-between px-2 py-1.5 rounded-md border text-xs cursor-pointer transition-colors duration-300
+          ${activeField === "due" ? "border-indigo-300 bg-indigo-50" : "border-slate-200"}`}
+      >
+        <span className={dateObj ? "text-indigo-700 font-medium" : "text-slate-400"}>
+          {dateObj ? formatDisplay(dateObj) : "Due date"}
+        </span>
+        {dateObj && (
+          <XMarkIcon
+            className="w-3.5 h-3.5 text-slate-400 hover:text-red-500"
+            onClick={(e) => { e.stopPropagation(); onDateChange(null) }}
+          />
+        )}
+      </div>
+    </div>
 
-            <div
-              onClick={() => setActiveField("due")}
-              className={`flex-1 flex items-center justify-between px-2 py-1.5 rounded-md border text-xs cursor-pointer
-                ${activeField === "due" ? "border-indigo-300 bg-indigo-50" : "border-slate-200"}`}
-            >
-              <span className={dateObj ? "text-indigo-700 font-medium" : "text-slate-400"}>
-                {dateObj ? formatDisplay(dateObj) : "Due date"}
-              </span>
-              {dateObj && (
-                <XMarkIcon
-                  className="w-3.5 h-3.5 text-slate-400 hover:text-red-500"
-                  onClick={(e) => { e.stopPropagation(); onDateChange(null) }}
-                />
-              )}
-            </div>
+    {/* Presets + Calendar side by side */}
+    <div className="flex">
 
-          </div>
+      {/* Left — Presets */}
+      <div className="w-36 border-r border-slate-100 py-2">
+        {PRESETS.map((preset) => (
+          <button
+            key={preset.label}
+            onClick={() => {
+              if (activeField === "start") {
+                onStartDateChange(toISODate(preset.date))
+                setActiveField("due")
+              } else {
+                onDateChange(toISODate(preset.date))
+                close()
+              }
+            }}
+            className="w-full text-left px-3 py-1.5 text-xs text-slate-600 hover:bg-indigo-50 hover:text-indigo-700"
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
 
-          <div className="p-2">
-            <p className="px-1 pb-1 text-xs font-medium text-slate-400">
-              Picking: {activeField === "start" ? "Start date" : "Due date"}
-            </p>
-            <DayPicker
-              mode="single"
-              selected={activeField === "start" ? startDateObj : dateObj}
-              onSelect={(date) => handleSelect(date, close)}
-              className="text-sm"
-            />
-          </div>
+      {/* Right — Calendar */}
+      <div className="p-2">
+        <DayPicker
+          mode="single"
+          selected={activeField === "start" ? startDateObj : dateObj}
+          onSelect={(date) => handleSelect(date, close)}
+          className="text-sm"
+        />
+      </div>
 
-          {(dateObj || startDateObj) && (
-            <div className="border-t border-slate-100 px-2 py-1">
-              <button
-                onClick={() => {
-                  onDateChange(null)
-                  onStartDateChange(null)
-                  close()
-                }}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-50 rounded"
-              >
-                <NoSymbolIcon className="w-4 h-4 text-slate-400" />
-                Clear all
-              </button>
-            </div>
-          )}
+    </div>
 
-        </div>
-      )}
+    {/* Clear all */}
+    {(dateObj || startDateObj) && (
+      <div className="border-t border-slate-100 px-2 py-1">
+        <button
+          onClick={() => {
+            onDateChange(null)
+            onStartDateChange(null)
+            close()
+          }}
+          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-50 rounded"
+        >
+          <NoSymbolIcon className="w-4 h-4 text-slate-400" />
+          Clear all
+        </button>
+      </div>
+    )}
+
+  </div>
+)}
     </Popover>
   )
 }
