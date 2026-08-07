@@ -116,6 +116,7 @@ function TaskCard({ task }) {
           onDateChange={(newDate) => handleDueDateChange(task.id, newDate)}
           startDate={task.startDate}
           onStartDateChange={(newDate) => handleStartDateChange(task.id, newDate)}
+          isOverdue={isOverdue()}
         />
 
         <Popover

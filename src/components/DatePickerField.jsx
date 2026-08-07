@@ -30,7 +30,7 @@ function renderTriggerLabel(startDateObj, dateObj) {
   return null
 }
 
-function DatePickerField({ selectedDate, onDateChange, startDate, onStartDateChange }) {
+function DatePickerField({ selectedDate, onDateChange, startDate, onStartDateChange,isOverdue }) {
   const [activeField, setActiveField] = useState("due")
 
   const dateObj = selectedDate ? new Date(selectedDate) : undefined
@@ -42,10 +42,28 @@ function DatePickerField({ selectedDate, onDateChange, startDate, onStartDateCha
 
     if (activeField === "start") {
       onStartDateChange(formatted)
+
+        // agar start date due date ke baad ya equal hai
+      if (selectedDate && formatted >= selectedDate) {
+      // due date = start date + 1
+      const nextDay = new Date(date)
+      nextDay.setDate(nextDay.getDate() + 1)
+      onDateChange(toISODate(nextDay))
+    }
+
       setActiveField("due")
     } else {
       onDateChange(formatted)
-      close()
+
+       // agar due date start date se pehle ya equal hai
+      if (startDate && formatted <= startDate) {
+      // start date = due date - 1
+      const prevDay = new Date(date)
+      prevDay.setDate(prevDay.getDate() - 1)
+      onStartDateChange(toISODate(prevDay))
+    }
+
+       close()
     }
   }
 
@@ -57,8 +75,9 @@ function DatePickerField({ selectedDate, onDateChange, startDate, onStartDateCha
       trigger={
         <button
           className={`inline-flex items-center gap-1 px-1.5 py-1 rounded-md border text-xs font-medium whitespace-nowrap
+            
             ${hasAnyDate
-              ? "border-indigo-200 bg-indigo-50 text-indigo-700 hover:border-indigo-300"
+              ? `border-indigo-200 bg-indigo-50 text-indigo-700 hover:border-indigo-300 ${isOverdue ? "text-red-600" : "text-indigo-700"}`
               : "border-slate-200 text-slate-400 hover:border-slate-300"}`}
         >
           <CalendarIcon className={`w-3.5 h-3.5 ${hasAnyDate ? "text-indigo-500" : "text-slate-300"}`} />
