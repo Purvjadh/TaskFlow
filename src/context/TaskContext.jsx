@@ -153,11 +153,11 @@ useEffect(() => {
   }
  
   
-  function handleAdd(title,newDueDate,boardId){
+  function handleAdd(title,newDueDate,boardId,status = ""){
      const newTask = {
       id: Date.now(),
       title: title,
-      status: "To Do",
+      status: status,
       priority:"Medium",
       startDate: null,
       dueDate:newDueDate,
@@ -215,8 +215,8 @@ function handleStartDateChange(taskId, newDate) {
     handleAddBoard,
     handleEditTitle,
     handleDeleteBoard,
-     handleDueDateChange, 
-     handleStartDateChange,
+    handleDueDateChange, 
+    handleStartDateChange,
     STATUSES
   }
 

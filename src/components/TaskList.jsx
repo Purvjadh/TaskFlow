@@ -2,7 +2,7 @@ import { useContext } from "react"
 import KanbanColumn from "./KanbanColumn.jsx"
 import TaskContext from "../context/TaskContext.jsx"
 
-function TaskList({tasks}){
+function TaskList({tasks,boardId}){
   const { STATUSES } = useContext(TaskContext)
 
   return(
@@ -12,6 +12,7 @@ function TaskList({tasks}){
           key={status}
           status={status}
           tasks={tasks.filter((task) => task.status === status)}
+          boardId={boardId}
         />
       ))}
     </div>

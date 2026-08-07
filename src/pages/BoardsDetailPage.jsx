@@ -51,7 +51,7 @@ export default function BoardsDetailPage() {
             </p>
           </div>
         ) : (
-          <TaskList tasks={filteredTasks} />
+          <TaskList tasks={filteredTasks} boardId={Number(boardId)} />
         )}
       </div>
     </div>
